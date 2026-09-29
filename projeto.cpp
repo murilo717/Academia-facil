@@ -5,10 +5,9 @@
 #define MAX_ALUNOS 50
 #define MAX_TREINOS 5
 
-// Definicao da estrutura para representar um Aluno
+// Definicao da estrutura para representar um Aluno (ID removido)
 typedef struct {
-    int id;
-    char matricula[20]; // Campo adicionado
+    char matricula[20];
     char nome[50];
     float peso;
     float altura;
@@ -16,7 +15,7 @@ typedef struct {
     int treinos[MAX_TREINOS];
 } Aluno;
 
-// Prototipos das funcoes refatoradas
+// Prototipos das funcoes
 void cadastrarAluno(Aluno alunos[], int *total);
 void listarAlunos(const Aluno alunos[], int total);
 void buscarAluno(const Aluno alunos[], int total);
@@ -42,38 +41,17 @@ int main() {
         getchar(); // Limpa o buffer do teclado
 
         switch (opcao) {
-            case 1:
-                cadastrarAluno(alunos, &totalAlunos);
-                break;
-            case 2:
-                listarAlunos(alunos, totalAlunos);
-                break;
-            case 3:
-                buscarAluno(alunos, totalAlunos);
-                break;
-            case 4:
-                alterarAluno(alunos, totalAlunos);
-                break;
-            case 5:
-                registrarPeso(alunos, totalAlunos);
-                break;
-            case 6:
-                calcularIMC(alunos, totalAlunos);
-                break;
-            case 7:
-                registrarTreino(alunos, totalAlunos);
-                break;
-            case 8:
-                consultarTreinos(alunos, totalAlunos);
-                break;
-            case 9:
-                listarAlunosAtivos(alunos, totalAlunos);
-                break;
-            case 0:
-                printf("\nSaindo do sistema... Ate logo!\n");
-                break;
-            default:
-                printf("\nOpcao invalida! Tente novamente.\n");
+            case 1: cadastrarAluno(alunos, &totalAlunos); break;
+            case 2: listarAlunos(alunos, totalAlunos); break;
+            case 3: buscarAluno(alunos, totalAlunos); break;
+            case 4: alterarAluno(alunos, totalAlunos); break;
+            case 5: registrarPeso(alunos, totalAlunos); break;
+            case 6: calcularIMC(alunos, totalAlunos); break;
+            case 7: registrarTreino(alunos, totalAlunos); break;
+            case 8: consultarTreinos(alunos, totalAlunos); break;
+            case 9: listarAlunosAtivos(alunos, totalAlunos); break;
+            case 0: printf("\nSaindo do sistema... Ate logo!\n"); break;
+            default: printf("\nOpcao invalida! Tente novamente.\n");
         }
         printf("\nPressione Enter para continuar...");
         getchar();
@@ -88,7 +66,7 @@ void menuPrincipal() {
     printf("========================================\n");
     printf(" 1. Cadastrar Aluno\n");
     printf(" 2. Listar Todos os Alunos\n");
-    printf(" 3. Buscar Aluno por ID\n");
+    printf(" 3. Buscar Aluno por Matricula\n");
     printf(" 4. Alterar Dados do Aluno\n");
     printf(" 5. Registrar Novo Peso\n");
     printf(" 6. Calcular e Exibir IMC\n");
@@ -97,6 +75,15 @@ void menuPrincipal() {
     printf(" 9. Listar Apenas Alunos Ativos\n");
     printf(" 0. Sair\n");
     printf("========================================\n");
+}
+
+int encontrarAlunoPorMatricula(const Aluno alunos[], int total, const char *matricula) {
+    for (int i = 0; i < total; i++) {
+        if (strcmp(alunos[i].matricula, matricula) == 0) {
+            return i; // Retorna o índice do aluno no vetor
+        }
+    }
+    return -1; // Retorna -1 se não encontrar
 }
 
 void cadastrarAluno(Aluno alunos[], int *total) {
@@ -110,17 +97,15 @@ void cadastrarAluno(Aluno alunos[], int *total) {
 
     printf("\nCodigo de Matricula: ");
     fgets(tempMatricula, 20, stdin);
-    strtok(tempMatricula, "\n"); // Remove a quebra de linha
+    strtok(tempMatricula, "\n");
 
     // Verifica se a matrícula já existe no sistema
     if (encontrarAlunoPorMatricula(alunos, *total, tempMatricula) != -1) {
-        printf("\nErro: ID / Matricula ja cadastrada! Operacao cancelada.\n");
-        return; // Interrompe o cadastro e volta ao menu principal
+        printf("\nErro: Matricula ja cadastrada! Operacao cancelada.\n");
+        return;
     }
 
-    // Se a matrícula for inédita, copia para a struct e continua o cadastro
     strcpy(alunos[idx].matricula, tempMatricula);
-    alunos[idx].id = idx + 1;
 
     printf("Nome do Aluno: ");
     fgets(alunos[idx].nome, 50, stdin);
@@ -131,17 +116,16 @@ void cadastrarAluno(Aluno alunos[], int *total) {
     
     printf("Altura (m): ");
     scanf("%f", &alunos[idx].altura);
-    getchar(); // Limpa o buffer do teclado apos ler floats
+    getchar();
 
-    alunos[idx].ativo = 1; // Aluno entra como ativo por padrao
+    alunos[idx].ativo = 1;
 
-    // Inicializa o historico de treinos zerado
     for (int j = 0; j < MAX_TREINOS; j++) {
         alunos[idx].treinos[j] = 0;
     }
 
     (*total)++;
-    printf("\nAluno cadastrado com sucesso! (ID: %d | Matricula: %s)\n", alunos[idx].id, alunos[idx].matricula);
+    printf("\nAluno cadastrado com sucesso! (Matricula: %s)\n", alunos[idx].matricula);
 }
 
 void listarAlunos(const Aluno alunos[], int total) {
@@ -151,41 +135,42 @@ void listarAlunos(const Aluno alunos[], int total) {
     }
     printf("\n--- LISTA DE ALUNOS ---\n");
     for (int i = 0; i < total; i++) {
-        printf("ID: %d | Matricula: %s | Nome: %s | Peso: %.2fkg | Altura: %.2fm | Status: %s\n",
-               alunos[i].id, alunos[i].matricula, alunos[i].nome, alunos[i].peso, alunos[i].altura,
+        printf("Matricula: %s | Nome: %s | Peso: %.2fkg | Altura: %.2fm | Status: %s\n",
+               alunos[i].matricula, alunos[i].nome, alunos[i].peso, alunos[i].altura,
                alunos[i].ativo ? "Ativo" : "Inativo");
     }
 }
 
 void buscarAluno(const Aluno alunos[], int total) {
-    int id;
-    printf("\nDigite o ID do aluno: ");
-    scanf("%d", &id);
-    getchar();
+    char matricula[20];
+    printf("\nDigite a Matricula do aluno: ");
+    fgets(matricula, 20, stdin);
+    strtok(matricula, "\n");
 
-    if (id > 0 && id <= total) {
-        int idx = id - 1;
-        printf("Encontrado: ID %d | Matricula: %s - Nome: %s\n", alunos[idx].id, alunos[idx].matricula, alunos[idx].nome);
+    int idx = encontrarAlunoPorMatricula(alunos, total, matricula);
+
+    if (idx != -1) {
+        printf("Encontrado: Matricula: %s - Nome: %s\n", alunos[idx].matricula, alunos[idx].nome);
     } else {
         printf("Aluno nao encontrado.\n");
     }
 }
 
 void alterarAluno(Aluno alunos[], int total) {
-    int id;
-    printf("\nDigite o ID do aluno para alterar: ");
-    scanf("%d", &id);
-    getchar();
+    char matriculaBusca[20];
+    printf("\nDigite a Matricula atual do aluno para alterar: ");
+    fgets(matriculaBusca, 20, stdin);
+    strtok(matriculaBusca, "\n");
 
-    if (id > 0 && id <= total) {
-        int idx = id - 1;
+    int idx = encontrarAlunoPorMatricula(alunos, total, matriculaBusca);
+
+    if (idx != -1) {
         char tempMatricula[20];
-
         printf("Nova Matricula (atual: %s): ", alunos[idx].matricula);
         fgets(tempMatricula, 20, stdin);
         strtok(tempMatricula, "\n");
 
-        // Verifica se a nova matrícula digitada já existe E se não é a própria matrícula atual do aluno
+        // Verifica se a nova matrícula digitada já existe e não é a dele mesmo
         int busca = encontrarAlunoPorMatricula(alunos, total, tempMatricula);
         if (busca != -1 && busca != idx) {
             printf("\nErro: Esta matricula ja pertence a outro aluno! Alteracao cancelada.\n");
@@ -209,13 +194,14 @@ void alterarAluno(Aluno alunos[], int total) {
 }
 
 void registrarPeso(Aluno alunos[], int total) {
-    int id;
-    printf("\nDigite o ID do aluno: ");
-    scanf("%d", &id);
-    getchar();
+    char matricula[20];
+    printf("\nDigite a Matricula do aluno: ");
+    fgets(matricula, 20, stdin);
+    strtok(matricula, "\n");
 
-    if (id > 0 && id <= total) {
-        int idx = id - 1;
+    int idx = encontrarAlunoPorMatricula(alunos, total, matricula);
+
+    if (idx != -1) {
         printf("Novo peso (kg): ");
         scanf("%f", &alunos[idx].peso);
         getchar();
@@ -234,10 +220,9 @@ void classificarIMC(float imc) {
 
 void calcularIMC(const Aluno alunos[], int total) {
     char matricula[20];
-
     printf("\nDigite a Matricula do aluno: ");
     fgets(matricula, 20, stdin);
-    strtok(matricula, "\n"); // Remove a quebra de linha
+    strtok(matricula, "\n");
 
     int idx = encontrarAlunoPorMatricula(alunos, total, matricula);
 
@@ -256,13 +241,16 @@ void calcularIMC(const Aluno alunos[], int total) {
 }
 
 void registrarTreino(Aluno alunos[], int total) {
-    int id, codigoTreino;
-    printf("\nDigite o ID do aluno: ");
-    scanf("%d", &id);
-    getchar();
+    char matricula[20];
+    int codigoTreino;
+    
+    printf("\nDigite a Matricula do aluno: ");
+    fgets(matricula, 20, stdin);
+    strtok(matricula, "\n");
 
-    if (id > 0 && id <= total) {
-        int idx = id - 1;
+    int idx = encontrarAlunoPorMatricula(alunos, total, matricula);
+
+    if (idx != -1) {
         printf("Digite o codigo do treino (ex: 101, 102): ");
         scanf("%d", &codigoTreino);
         getchar();
@@ -281,13 +269,14 @@ void registrarTreino(Aluno alunos[], int total) {
 }
 
 void consultarTreinos(const Aluno alunos[], int total) {
-    int id;
-    printf("\nDigite o ID do aluno: ");
-    scanf("%d", &id);
-    getchar();
+    char matricula[20];
+    printf("\nDigite a Matricula do aluno: ");
+    fgets(matricula, 20, stdin);
+    strtok(matricula, "\n");
 
-    if (id > 0 && id <= total) {
-        int idx = id - 1;
+    int idx = encontrarAlunoPorMatricula(alunos, total, matricula);
+
+    if (idx != -1) {
         printf("Treinos registrados para %s (Matricula: %s): ", alunos[idx].nome, alunos[idx].matricula);
         for (int j = 0; j < MAX_TREINOS; j++) {
             printf("[%d] ", alunos[idx].treinos[j]);
@@ -303,19 +292,9 @@ void listarAlunosAtivos(const Aluno alunos[], int total) {
     int encontrou = 0;
     for (int i = 0; i < total; i++) {
         if (alunos[i].ativo) {
-            printf("ID: %d | Matricula: %s | Nome: %s\n", alunos[i].id, alunos[i].matricula, alunos[i].nome);
+            printf("Matricula: %s | Nome: %s\n", alunos[i].matricula, alunos[i].nome);
             encontrou = 1;
         }
     }
     if (!encontrou) printf("Nenhum aluno ativo encontrado.\n");
-}
-
-
-int encontrarAlunoPorMatricula(const Aluno alunos[], int total, const char *matricula) {
-    for (int i = 0; i < total; i++) {
-        if (strcmp(alunos[i].matricula, matricula) == 0) {
-            return i; // Retorna o índice do aluno no vetor
-        }
-    }
-    return -1; // Retorna -1 se não encontrar
 }
